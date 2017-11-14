@@ -1,0 +1,370 @@
+syntax = "proto3";
+package battlespheresproto;
+
+//消息id定义
+enum msgId 
+{
+    unused = 0;
+    cmdLoginReq = 100;          //请求进入服务器
+    cmdLoginRsp = 101;          //请求进入服务器结果
+    cmdCreateRoleReq = 102;     //请求创建角色
+    cmdCreateRoleRsp = 103;     //请求创建角色结果
+    cmdLoadUserDataReq = 104;   //请求下发玩家数据
+    cmdLoadUserDataRsp = 105;   //服务器下发玩家数据
+    
+    cmdJoinRoomReq = 112;   	//加入房间
+    cmdJoinRoomRsp = 113;
+    cmdQuitRoomReq = 114;   	//离开房间
+    cmdQuitRoomRsp = 115;
+    cmdJoinRoomEvent = 116; 	//进入房间通知
+    cmdQuitRoomEvent = 117; 	//退出房间通知
+    cmdDismissRoomEvent = 118;  //房间解散通知
+    
+    cmdBuyBuffReq = 119;        //购买buff
+    cmdBuyBuffRsp = 120;
+
+    cmdWeaponBuyReq = 121;//购买武器
+    cmdWeaponBuyRsp = 122;
+    cmdWeaponEquipReq = 123;//装备武器
+    cmdWeaponEquipRsp = 124;
+
+    cmdSkillUpgradeReq = 125;//升级技能
+    cmdSkillUpgradeRsp = 126;
+	
+    cmdFindFBReq= 300;//查找FB
+    cmdFindFBRsp = 301;	
+        cmdInvitationReq=302;
+    cmdInvitationRsp=203;
+    cmdInvitationAnswerReq =304;
+    cmdInvitationAnswerRsp =305;
+	
+    cmdBattleResultReq = 206;
+    cmdBattleResultRsp = 207;
+
+    cmdPlayerStatus = 906;	//
+	
+}
+
+enum error_code
+{
+    success = 0;
+
+    server_is_busy              = 1;    //服务器繁忙
+    need_to_create_a_role       = 2;    //需要创建新角色
+
+    //大于等于100 为错误码
+    account_already_exists      = 100;  //账号已经存在
+    account_or_password_error   = 101;  //账号或密码错误
+    token_verify_error          = 102;  //登陆验证错误
+    token_verify_expired        = 103;  //登陆已过期，请重新登陆
+
+    role_id_non_existed         = 200;  //角色id不存在
+    nick_name_too_long          = 201;  //昵称太长
+    nick_name_existing_keyword  = 202;  //昵称中含有敏感字
+	nick_name_non_existed       = 203;    //昵称不存在
+	
+	player_info_invalid         = 300;	//玩家信息无效
+	weapon_id_non_exists        = 301;	//武器Id不存在 
+    money_non_enough            = 302;  //金币不够
+    weapon_already_have         = 303;  //已拥有武器
+    weapon_non_have             = 304;  //未拥有武器
+	
+	skill_already_have          = 305;  //此技能已经学习
+	skill_idLevel_non_existed   = 306;  //技能id等级不存在
+	
+	fb_id_non_exist             = 307;  //账户不存在
+	user_non_online            = 308;   //玩家不在线
+	
+	invitation_refuse           = 309; //拒绝加入邀请
+	
+	player_non_mission          = 311; //玩家不在任务中
+	player_in_mission           =312; //玩家正在任务进行中
+	missionConfig_non_have      =323; //找不到任务配置
+	mission_progress_expire     =324; //任务进度过期
+	mission_expire              =325;//单个任务过期
+	player_non_have_mission      =326;//玩家没有该任务
+	
+	join_room_fail              =327;//加入房间失败
+}
+
+
+message SkillInfo
+{
+    int32 id = 1; //技能ID
+    int32 level = 2;//技能等级
+}
+
+message WeaponProperty
+{
+    int32 id = 1; //属性id
+    float value = 2; 
+}
+
+message WeaponInfo
+{
+    int32 id = 1; //枪支ID
+    int32 index = 2; //装备位置
+	repeated WeaponProperty weapon_properties = 3;//枪支属性效果
+}
+
+
+message MissionInfo
+{
+	int32 id = 1;
+	int32 receivedTime = 2;//任务获得时间
+	int32 postion =3;//刷新位置
+}
+
+message MissionProgressInfo
+{
+	int32 missionType = 1; //类型
+	int32 progress = 2; //进度
+	int32 expireTime = 3;//cd到期时间
+}
+
+//玩家数据在服务器中存储的格式
+//经过protobuf序列化后的数据
+message GameUserInfo
+{
+	int32 user_id = 1;//账号ID
+    bytes nickname = 2;//昵称
+    int32 role_id = 3;//角色ID
+    int32 rank = 4;//军衔
+    int32 coin = 5;//金币
+    int32 exp = 6;//经验
+	int32 level = 7;//等级
+	
+    bytes strSkillInfos = 21; //技能列表
+    bytes strWeaponInfos = 22;//枪支列表
+	bytes strprogress = 23;//任务进度
+	bytes strMissionInfos = 24;//任务列表
+}
+
+message WeaponInfos
+{
+	repeated WeaponInfo weapon_infos = 1;//枪支列表
+}
+
+message SkillInfos
+{
+	repeated SkillInfo skill_infos = 1; //技能列表
+}
+
+message MissionInfos
+{
+	repeated MissionInfo mission_infos = 1;//任务列表
+}
+
+message UserInfo
+{
+    int32 user_id = 1;//账号ID
+    bytes nickname = 3;//昵称
+    int32 role_id = 4;//角色ID
+    int32 rank = 17;//军衔
+    int32 coin = 18;//金币
+    int32 exp = 19;//经验
+    repeated SkillInfo skill_infos = 21; //技能列表
+    repeated WeaponInfo weapon_infos = 22;//枪支列表
+	MissionProgressInfo mission_progress_info = 31;//任务进度
+	repeated MissionInfo mission_infos = 32;//任务列表
+}
+
+
+
+//登陆
+message LoginReq
+{
+    string token = 1;		//登陆key
+}
+
+message LoginRsp
+{
+    int32 result = 1;		//登录失败原因：账号不存在或密码错误、会话过期
+    int32 timestamp = 2; 	//服务器当前时间戳
+}
+
+//创角
+message CreateRoleReq
+{
+    int32 roleId = 1;		//所选角色id
+    bytes nickname = 2;	//玩家昵称
+}
+
+message CreateRoleRsp
+{
+    int32 result = 1;
+}
+
+//通知客户端玩家数据
+message LoadUserDataRsp
+{
+    UserInfo info = 1;
+}
+
+message PlayerStatus
+{
+    int32 id = 1;
+    bool isOnline = 2;
+}
+
+//房间内玩家信息
+message RoomPlayerInfo
+{
+    int32 user_id = 1;//账号ID
+    bytes nickname = 3;//昵称
+    repeated WeaponInfo weapon_infos = 4;//枪支ID列表
+}
+
+message DismissRoomEvent
+{
+    int32 reason = 1; //解散原因
+}
+
+
+
+//玩家加入房间
+message JoinRoomReq
+{
+    int32 room_id = 1;  //房间ID 0 创建房间，-1 系统匹配， > 0 直接进入
+    int32 level_id = 2; //关卡ID
+    int32 mode = 3;     //玩法模式
+    bool  private = 4;  //是否私有房间
+
+    repeated WeaponInfo weapon_infos = 5;//枪支ID列表
+}
+
+message JoinRoomRsp
+{
+    int32 result = 1;
+    int32 room_id = 2;  //房间id
+    int32 level_id = 3; //关卡ID
+    int32 owner_id = 4; //房主id
+    repeated RoomPlayerInfo other_players = 5;//房间内玩家信息
+}
+
+//通知房主玩家进入房间
+message JoinRoomEvent
+{
+    RoomPlayerInfo info = 1;//玩家信息
+}
+
+//玩家离开房间请求
+message QuitRoomReq
+{
+    int32 room_id = 1;//房间ID
+}
+
+message QuitRoomRsp
+{
+    int32 result = 1;
+}
+
+//玩家退出房间通知
+message QuitRoomEvent
+{
+    int32 user_id = 1;//账号ID
+}
+
+//购买buff
+message BuyBuffReq
+{
+    int32 buff_id = 1;
+}
+
+message BuyBuffRsp
+{
+    int32 result = 1;
+}
+
+
+//购买武器
+message WeaponBuyReq
+{
+    int32 id = 1;	 //武器Id
+}
+
+message WeaponBuyRsp
+{
+    int32 result = 1;
+    UserInfo info = 2; //由于有消耗，故返回userinfo
+}
+
+message WeaponEquipInfo
+{
+	int32 id = 1;	 //武器Id
+	int32 index = 2; //装备位置
+}
+
+//装备武器
+message WeaponEquipReq
+{
+	repeated WeaponEquipInfo infos = 1;//所有装备了的武器
+}	
+
+message WeaponEquipRsp
+{
+    int32 result = 1;
+	UserInfo info = 2; //由于有消耗，故返回userinfo
+}
+
+//升级技能
+message SkillUpgradeReq
+{
+    int32 skillId = 1;
+    int32 next_lv = 2;//升到的等级
+}
+
+message SkillUpgradeRsp
+{
+    int32 result = 1;
+    UserInfo info = 2; //由于有消耗，故返回userinfo
+}
+
+//查找FB id玩家
+message FindFBReq
+{
+	uint32 fb_id=1;
+}
+
+message FindFBRsp
+{
+	int32 result = 1;
+	RoomPlayerInfo info = 2;//玩家信息
+}
+
+//发起邀请
+message InvitationReq
+{
+	uint32 id =1;
+}
+
+//通知邀请
+message InvitationRsp
+{
+	RoomPlayerInfo info = 1;//玩家信息
+}
+
+//返回邀请回复
+message InvitationAnswerReq
+{
+	int32 result =1;//0：拒绝；1:同意
+	uint32 id= 2;//邀请人id
+}
+
+message InvitationAnswerRsp
+{
+	int32 result =1;
+}
+
+//结算
+message BattleResultReq
+{
+	int32 killCount = 1;//杀僵尸数量
+	int32 points = 2;//杀僵尸点数
+}
+
+message BattleResultRsp
+{
+	int32 result = 1;//任务完成结果
+	UserInfo info  = 2;//获得金币
+}

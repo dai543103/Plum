@@ -1,0 +1,58 @@
+syntax = "proto3";
+package battlespheresproto_login;
+
+//消息id定义
+enum msgId 
+{
+    unused = 0;
+
+	cmdVerifyReq = 200;
+	cmdVerifyRsp = 201;
+	cmdRegistReq = 202;
+	cmdRegistRsp = 203;
+	
+	cmdAPPVerifyReq = 204;
+	cmdAPPRegistReq = 205;
+}
+
+enum error_code
+{
+    success = 0;
+
+    server_is_busy              = 1;    //服务器繁忙
+    need_to_create_a_role       = 2;    //需要创建新角色
+
+    //大于等于100 为错误码
+    account_already_exists      = 100;  //账号已经存在
+    account_or_password_error   = 101;  //账号或密码错误
+    token_verify_error          = 102;  //登陆验证错误
+    token_verify_expired        = 103;  //登陆已过期，请重新登陆
+
+    role_id_non_existed         = 200;  //角色id不存在
+    nick_name_too_long          = 201;  //昵称太长
+    nick_name_existing_keyword  = 202;  //昵称中含有敏感字
+}
+
+//登陆验证
+message AccountInfo
+{
+	bytes acctname =1; //用户名
+	bytes password =2; //密码
+}
+
+message LoginKeyInfo
+{
+	int32 result=1; 
+	bytes loginaddr =2;   //逻辑服IP
+	int32 loginPort =3; //逻辑服端口号
+	bytes token=4; //密钥
+}
+
+
+//FB登陆验证
+message APPAccountInfo
+{
+	int32 appid=1;
+}
+
+
